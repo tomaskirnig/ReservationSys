@@ -1,0 +1,50 @@
+'use client';
+import { useState, useEffect } from 'react';
+import { FormControl, ListGroup } from 'react-bootstrap';
+
+export default function SeeLessonsPage() {
+  const [query, setQuery] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
+  const [lessons, setLessons] = useState([]);
+
+  useEffect(() => {
+    if (!query) return;
+    fetch(`/api/users?search=${query}`)
+      .then(r => r.json())
+      .then(setSuggestions);
+  }, [query]);
+
+  const handleSelect = (name) => {
+    setQuery(name);
+    setSuggestions([]);
+    fetch(`/api/lessons_by_user?user=${encodeURIComponent(name)}`)
+      .then(r => r.json())
+      .then(setLessons);
+  };
+
+  return (
+    <div>
+      <FormControl
+        placeholder="Your name"
+        value={query}
+        onChange={e => setQuery(e.target.value)}
+      />
+      <ListGroup className="mt-1">
+        {suggestions.map(u => (
+          <ListGroup.Item key={u} action onClick={() => handleSelect(u)}>
+            {u}
+          </ListGroup.Item>
+        ))}
+      </ListGroup>
+
+      <h3 className="mt-4">Lessons for {query}</h3>
+      <ListGroup>
+        {lessons.map(les => (
+          <ListGroup.Item key={les.id}>
+            {new Date(les.start).toLocaleTimeString()} - {new Date(les.end).toLocaleTimeString()} | Room {les.room}
+          </ListGroup.Item>
+        ))}
+      </ListGroup>
+    </div>
+    );
+}
