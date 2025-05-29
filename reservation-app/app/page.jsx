@@ -11,12 +11,12 @@ export default function HomePage() {
   const [date, setDate] = useState(new Date());
   const [events, setEvents] = useState([]);
 
-  // useEffect(() => {
-  //   const ymd = date.toISOString().slice(0,10);
-  //   fetch(`/api/lessons?day=${ymd}`)
-  //     .then(r => r.json())
-  //     .then(setEvents);
-  // }, [date]);
+  useEffect(() => {
+    const ymd = date.toISOString().slice(0,10);
+    fetch(`/api/lessons?day=${ymd}`)
+      .then(r => r.json())
+      .then(setEvents);
+  }, [date]);
 
   return (
     <>
