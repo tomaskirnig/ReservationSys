@@ -1,18 +1,33 @@
 'use client';
+
 import { useState, useEffect } from 'react';
 import { FormControl, ListGroup } from 'react-bootstrap';
 
 export default function SeeLessonsPage() {
+  const [user, setUser] = useState('');
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [lessons, setLessons] = useState([]);
 
   useEffect(() => {
-    if (!query) return;
-    fetch(`/api/users?search=${query}`)
-      .then(r => r.json())
-      .then(setSuggestions);
-  }, [query]);
+    async function fetchUsers() {
+      try {
+        const response = await fetch('/api/users');
+        if (!response.ok) {
+          throw new Error('Failed to fetch users');
+        }
+
+        const data = await response.json();
+        console.log('Fetched users:', data);
+        setUser(data.map(u => u.name));
+      } catch (error) {
+        console.error('Error fetching users:', error);
+        setUser([]);
+      }
+    }
+    
+    fetchUsers();
+  },[]);
 
   const handleSelect = (name) => {
     setQuery(name);

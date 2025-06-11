@@ -1,18 +1,35 @@
 import prisma from '../../../lib/prisma';
 import { NextResponse } from 'next/server';
+import { getColor } from '../../utils/ColorDispensor';
 
 export async function GET(request) {
   try {
+    console.log('Received GET request for lessons');
+    if (prisma === null) {
+      console.error('Prisma client is not initialized');
+      return NextResponse.json({ error: 'Prisma client is not initialized' }, { status: 500 });
+    }
     const { searchParams } = new URL(request.url);
     const day = searchParams.get('day');
+    const selectedRoom = searchParams.get('room');
+    
+    console.log(`API Request:${day} room: ${selectedRoom} }`);
     
     if (!day) {
       return NextResponse.json({ error: 'Day parameter is required' }, { status: 400 });
     }
+
+    if (!selectedRoom) {
+      return NextResponse.json({ error: 'Room parameter is required' }, { status: 400 });
+    }
     
-    // Get start and end of the specified day
-    const startOfDay = new Date(`${day}T00:00:00`);
-    const endOfDay = new Date(`${day}T23:59:59`);
+    const startOfDay = new Date(day);
+    startOfDay.setHours(0, 0, 0, 0);
+    
+    const endOfDay = new Date(day);
+    endOfDay.setHours(23, 59, 59, 999);
+    
+    console.log(`Querying from ${startOfDay.toISOString()} to ${endOfDay.toISOString()}`);
     
     // Query the database using Prisma
     const reservations = await prisma.reservation.findMany({
@@ -21,28 +38,34 @@ export async function GET(request) {
           gte: startOfDay,
           lte: endOfDay,
         },
+        room: selectedRoom
       },
-      orderBy: {
-        startTime: 'asc'
-      }
     });
     
+    console.log(`Found ${reservations.length} reservations`);
+
     // Transform to FullCalendar event format
-    const events = reservations.map(res => ({
+    const events = reservations.map(res => {
+    const { bg, border } = getColor();
+    
+    return {
       id: res.id,
-      title: res.name,
+      title: res.name, 
       start: res.startTime.toISOString(),
       end: res.endTime.toISOString(),
+      backgroundColor: bg,
+      borderColor: border,
       extendedProps: {
         room: res.room,
         nameProam: res.nameProam
       }
-    }));
+    };
+  });
     
     return NextResponse.json(events);
   } catch (error) {
     console.error('Error fetching lessons:', error);
-    return NextResponse.json({ error: 'Failed to fetch lessons' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to fetch lessons: ' + error.message }, { status: 500 });
   }
 }
 

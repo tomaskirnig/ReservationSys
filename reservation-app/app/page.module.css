@@ -6,12 +6,12 @@
   --button-primary-hover: #383838;
   --button-secondary-hover: #f2f2f2;
 
-  display: grid;
+  /* display: grid; */
   grid-template-rows: 20px 1fr 20px;
   align-items: center;
   justify-items: center;
-  min-height: 100svh;
-  padding: 80px;
+  /* min-height: 100svh; */
+  /* padding: 80px; */
   gap: 64px;
   font-family: var(--font-geist-sans);
 }
@@ -165,5 +165,80 @@ a.secondary {
   .logo {
     filter: invert();
   }
+}
+
+.calendarPageWrapper {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  height: 100%;
+  width: 100%;
+  padding: 16px;
+  overflow: hidden;
+}
+
+.calendarControls {
+  margin-bottom: 15px;
+  flex-shrink: 0;
+}
+
+.calendarContainer {
+  flex-grow: 1;
+  min-height: 0; /* Critical for flex children to respect parent height */
+  width: 100%;
+}
+
+/* Make calendar take up full height of container */
+.calendarContainer > div {
+  height: 100%;
+}
+
+.calendarContainer :global(.fc-scrollgrid) {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .calendarPageWrapper {
+    padding: 8px;
+    height: calc(90vh - 16px); /* Account for any potential browser UI */
+  }
+  
+  .calendarControls {
+    margin-bottom: 8px;
+  }
+}
+
+/* Calendar background */
+.calendarContainer :global(.fc-theme-standard) {
+  background: #ffffff;
+}
+
+/* Header colors */
+.calendarContainer :global(.fc-col-header-cell) {
+  background-color: #4285f4;
+  color: white;
+}
+
+/* Time slots */
+.calendarContainer :global(.fc-timegrid-slot) {
+  background-color: #f8f9fa;
+}
+
+/* Today highlight */
+.calendarContainer :global(.fc-day-today) {
+  background-color: rgba(0, 0, 0, 0.123) !important;
+  color: black;
+}
+.calendarContainer :global(.fc-col-header-cell-cushion) {
+  color: black;
+  
+}
+
+/* Event styling */
+.calendarContainer :global(.fc-event) {
+  background-color: #34a853;
+  border-color: #1e8e3e;
 }
 
